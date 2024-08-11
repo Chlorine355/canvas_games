@@ -1,0 +1,94 @@
+<html>
+<head>
+<title>
+  Snake gameee
+</title>
+</head>
+<body>
+
+<canvas id="canvas" width="500" height="500" style="border: 2px solid orange; margin: 0 auto; display: block"></canvas>
+<div style="margin: 15 auto; width: fit-content; font-size: 50px;">
+  Счёт: <span id="score">0</span>
+</div>
+
+<script>
+  function randInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  let canvas = document.getElementById("canvas");
+  let ctx = canvas.getContext("2d");
+  let snake = [ [randInt(0, 10), randInt(0, 10)] ];
+  const [UP, RIGHT, DOWN, LEFT] = [1, 2, 3, 4];
+  let direction = RIGHT;
+  let apple = [randInt(0, 19), randInt(0, 19)];
+  let score = 0;
+  let gameOn = true;
+  let scoreElem = document.getElementById("score");
+  // обработка события нажатия клавиши
+  document.addEventListener("keydown", (event) => {
+    if (!gameOn) {return}
+    switch (event.keyCode) {
+      case 38: if (direction != DOWN) {direction = UP}; step(); break;
+      case 40: if (direction != UP) {direction = DOWN}; step(); break;
+      case 37: if (direction != RIGHT) {direction = LEFT}; step(); break;
+      case 39: if (direction != LEFT) {direction = RIGHT}; step(); break;
+    }
+  })
+  // функция конца игры - отключает цикл, отключает обработку стрелок и показывает сообщение
+  function gameOver(msg) {
+    clearInterval(mainTimer);
+    gameOn = false;
+    alert(msg);
+  }
+  // цикл игры - расчёт положения змейки, яблока и отрисовка всего
+  function step() {
+    // расчет следующего положения и проверка съедения
+    let newHead = [...snake.at(-1)];
+    switch (direction) {
+      case RIGHT: newHead[0] += 1; break;
+      case LEFT: newHead[0] -= 1; break;
+      case UP: newHead[1] -= 1; break;
+      case DOWN: newHead[1] += 1; break;
+    }
+    snake.push(newHead);
+    let tail = snake.shift();
+    if (apple[0] == newHead[0] && apple[1] == newHead[1]) {
+      snake.unshift(tail);
+      apple = [randInt(0, 19), randInt(0, 19)];
+      score += 1;
+      scoreElem.innerHTML = score;
+      if (score >= 115) {
+        gameOver("Вы победили!")
+      }
+    }
+    if (newHead[0] < 0 || newHead[1] < 0 || newHead[0] > 19 || newHead[1] > 19) {
+      gameOver("Убился об стенку");
+    }
+    for (let i = 0; i < snake.length - 1; i++) {
+        if (snake[i][0] == newHead[0] && snake[i][1] == newHead[1]) {
+          gameOver("Убился об себя")
+        }
+    }
+
+    // отрисовка
+    ctx.clearRect(0, 0, 500, 500);
+    ctx.fillStyle = "red";
+    ctx.fillRect(apple[0] * 25, apple[1] * 25, 25, 25);
+    ctx.fillStyle = "black";
+    for (let part of snake) {
+      ctx.fillRect(part[0] * 25,
+                   part[1] * 25,
+                   25,
+                   25
+                 );
+    }
+  }
+
+  let mainTimer = setInterval(step, 300);
+</script>
+
+</body>
+</html>
