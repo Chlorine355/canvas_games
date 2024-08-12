@@ -1,0 +1,244 @@
+<html>
+<head>
+<title>
+2048 5x5 gameee
+</title>
+</head>
+<body>
+
+<canvas autofocus id="canvas" width="500" height="500" style="border: 2px solid orange; margin: 0 auto; display: block"></canvas>
+<div style="margin: 15 auto; width: fit-content; font-size: 50px;">
+  Счёт: <span id="score">0</span>
+</div>
+
+<script>
+
+function randInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function drawNet() {
+  ctx.beginPath();
+  for (let i = 0; i < 6; i++) {
+    ctx.moveTo(0, i * 100);
+    ctx.lineTo(500, i * 100);
+    ctx.moveTo(i * 100, 0);
+    ctx.lineTo(i * 100, 500);
+  }
+  ctx.stroke();
+}
+
+function drawField() {
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      if (field[i][j]) {
+        ctx.fillStyle = colors[field[i][j]];
+        ctx.fillRect(100*i+1, 100*j+1, 98, 98);
+        ctx.fillStyle = "black";
+        ctx.fillText(field[i][j], 100*i + 50, 100*j + 50)
+      }
+    }
+  }
+}
+
+function gameOver(msg) {
+  gameOn = false;
+  alert(msg);
+}
+
+function addScore(n) {
+  score += n;
+  scoreElem.innerHTML = score;
+}
+
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+ctx.font = "48px monospace";
+ctx.textBaseline = "middle";
+ctx.textAlign = "center";
+let scoreElem = document.getElementById("score");
+const colors = {2: "#F5DFBB",
+                4: "#F0CF99",
+                8: "#EBC17A",
+                16: "#E7B45E",
+                32: "#E3A844",
+                64: "#E09D2D",
+                128: "#D3901F",
+                256: "#BE821C",
+                512: "#AB7519",
+                1014: "#9A6917",
+                2048: "red"}
+
+// starting position
+let field = [];
+let score = 0;
+let gameOn = true;
+let tilesFilled = 1;
+for (let i = 0; i < 5; i++) {
+  let newrow = [];
+  for (let j = 0; j < 5; j++) {
+    newrow.push(0);
+  }
+  field.push(newrow);
+}
+field[randInt(0, 4)][randInt(0, 4)] = 2;
+// draw starting position
+drawNet();
+drawField();
+// игра будет реагировать на нажатия стрелок, вся логика в обработчике этого события
+// сдвинуь и склеить все, заспавнить 2 или 4
+document.addEventListener("keydown", (event) => {
+  if (!gameOn) {return}
+  switch (event.keyCode) {
+    case 37: {
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (field[j][i] == 0) {
+            for (let k = j+1; k < 5; k++) {
+              if (field[k][i] != 0) {
+                field[j][i] = field[k][i];
+                field[k][i] = 0;
+                break;
+              }
+            }
+          }
+            for (let k = j+1; k < 5; k++) {
+              if (field[k][i] != 0) {
+                if (field[j][i] == field[k][i]) {
+                  field[j][i] *= 2;
+                  addScore(field[j][i]);
+                  if (field[j][i] == 2048) {
+                    gameOver("WE WIN THOOOOOOSE");
+                  };
+                  field[k][i] = 0;
+                  tilesFilled -= 1;
+                }
+                break;
+              }
+            }
+
+        }
+      }
+      break;
+    }; // up
+    case 39: {
+      for (let i = 4; i > -1; i--) {
+        for (let j = 4; j > 0 ; j--) {
+          if (field[j][i] == 0) {
+            for (let k = j-1; k > -1; k--) {
+              if (field[k][i] != 0) {
+                field[j][i] = field[k][i];
+                field[k][i] = 0;
+                break;
+              }
+            }
+          }
+            for (let k = j-1; k > -1; k--) {
+              if (field[k][i] != 0) {
+                if (field[j][i] == field[k][i]) {
+                  field[j][i] *= 2;
+                  addScore(field[j][i]);
+                  if (field[j][i] == 2048) {
+                    gameOver("WE WIN THOOOOOOSE");
+                  };
+                  field[k][i] = 0;
+                  tilesFilled -= 1;
+                }
+                break;
+              }
+            }
+
+        }
+      }
+      break;
+    }; // right
+    case 38: {
+        for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 4; j++) {
+          if (field[i][j] == 0) {
+            for (let k = j+1; k < 5; k++) {
+              if (field[i][k] != 0) {
+                field[i][j] = field[i][k];
+                field[i][k] = 0;
+                break;
+              }
+            }
+          }
+            for (let k = j+1; k < 5; k++) {
+              if (field[i][k] != 0) {
+                if (field[i][j] == field[i][k]) {
+                  field[i][j] *= 2;
+                  addScore(field[i][j]);
+                  if (field[i][j] == 2048) {
+                    gameOver("WE WIN THOOOOOOSE");
+                  };
+                  field[i][k] = 0;
+                  tilesFilled -= 1;
+                }
+                break;
+              }
+            }
+
+        }
+      }
+      break
+    }; // left
+    case 40: {
+      for (let i = 4; i > -1; i--) {
+        for (let j = 4; j > 0 ; j--) {
+          if (field[i][j] == 0) {
+            for (let k = j-1; k > -1; k--) {
+              if (field[i][k] != 0) {
+                field[i][j] = field[i][k];
+                field[i][k] = 0;
+                break;
+              }
+            }
+          }
+            for (let k = j-1; k > -1; k--) {
+              if (field[i][k] != 0) {
+                if (field[i][j] == field[i][k]) {
+                  field[i][j] *= 2;
+                  addScore(field[i][j]);
+                  if (field[i][j] == 2048) {
+                    gameOver("WE WIN THOOOOOOSE");
+                  };
+                  field[i][k] = 0;
+                  tilesFilled -= 1;
+                }
+                break;
+              }
+            }
+
+        }
+      }
+      break;
+    }; // down
+    default: return;
+  }
+  // sum logic hereee
+
+  let [newI, newJ] = [randInt(0, 4), randInt(0, 4)];
+  while (field[newI][newJ]) {
+    [newI, newJ] = [randInt(0, 4), randInt(0, 4)];
+  }
+  field[newI][newJ] = 2;
+  // addScore(2);
+  tilesFilled += 1;
+  if (tilesFilled >= 25) {
+    gameOver("Конец игры");
+  }
+
+
+  // отрисовка поля
+  ctx.clearRect(0,0,500,500);
+  drawNet();
+  drawField();
+
+})
+
+</script>
+</body>
+</html>
